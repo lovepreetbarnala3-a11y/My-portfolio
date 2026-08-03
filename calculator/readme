@@ -1,1 +1,42 @@
+# Calculator
+
+This is a simple GUI calculator built with Tkinter (Python's standard GUI toolkit). It provides basic arithmetic operations and a minimal interface suitable for learning and small scripts.
+
+## Files
+
+- `calculator.py` — Main program that launches the calculator window and handles input and operations.
+
+## Requirements
+
+- Python 3.x
+- Tkinter (usually included with standard Python installations)
+
+## Features
+
+- Number buttons 0–9
+- Addition, subtraction, multiplication, division
+- Clear and Quit buttons
+- Displays results in the entry box
+
+## Usage
+
+From the repository root run:
+
+```bash
+python calculator/calculator.py
+```
+
+Enter the first number, press an operator (+, -, *, /), enter the second number, then press `=` to see the result. Use `Clear` to reset the input and `Quit` to close the application.
+
+## Notes & Known Limitations
+
+- The current implementation converts inputs to integers; using non-integer input will raise a `ValueError`.
+- Division by zero will raise a `ZeroDivisionError`.
+- Results of division are regular Python division (may produce float results).
+
+## Suggested improvements
+
+- Support floating-point input and results.
+- Add keyboard input support and accessibility labels.
+- Add input validation and error handling to prevent crashes on invalid input.
 
