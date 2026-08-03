@@ -18,7 +18,7 @@ Open `web_page/Index.html` in your web browser to view the site. You can run a l
 ## How to view locally
 1. Clone the repository:
 
-   git clone https://github.com/lovepreetbarnala3-a11y/My-portfolio.git
+   git clone https://github.com/lovepreetbarnala3-a11y/projects.git
 2. Change into the repository directory and open the page in your browser:
 
    - Double-click `web_page/Index.html`, or
