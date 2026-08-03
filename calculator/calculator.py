@@ -1,97 +1,207 @@
-#step1: importing
-from tkinter import *
-#step2: Gui interaction
-window=Tk()
-window.title("Calculator")
-window.geometry("350x400",)
-window.resizable(False,False)
-#step3:entry box
-e=Entry(window,width=40,borderwidth=5)
-e.place(x=50,y=50)
-#step4:buttons
-def click(num):
-    result=e.get()
-    e.delete(0,END)
-    e.insert(0,str(result)+str(num))
-b=Button(window,text="1",width=10,command=lambda:click(1))
-b.place(x=50,y=100)
-b=Button(window,text="2",width=10,command=lambda:click(2))
-b.place(x=135,y=100)
-b=Button(window, text="3", width=10, command=lambda:click(3))
-b.place(x=220,y=100)
-b=Button(window, text="4", width=10, command=lambda:click(4))
-b.place(x=50,y=130)
-b=Button(window, text="5", width=10, command=lambda:click(5))
-b.place(x=135,y=130)
-b=Button(window, text="6", width=10, command=lambda: click(6))
-b.place(x=220,y=130)
-b=Button(window, text="7", width=10, command=lambda:click(7))
-b.place(x=50,y=160)
-b=Button(window,text="8",width=10,command=lambda:click(8))
-b.place(x=135,y=160)
-b=Button(window,text="9",width=10,command=lambda:click(9))
-b.place(x=220,y=160)
-b=Button(window,text="0",width=10,command=lambda:click(0))
-b.place(x=50,y=190)
-#step5: operators
-def add():
-    num1=e.get()
-    global i
-    global math
-    math="addition"
-    i=int(num1)
-    e.delete(0,END)
-b=Button(window,text="+",width=10,command=add)
-b.place(x=135,y=190)
-def sub():
-    num1=e.get()
-    global i
-    global math
-    math="subtraction"
-    i=int(num1)
-    e.delete(0,END)
-b=Button(window,text="-",width=10,command=sub)
-b.place(x=220,y=190)
-def mul():
-    num1=e.get()
-    global i
-    global math
-    math="multiplication"
-    i=int(num1)
-    e.delete(0,END)
-b=Button(window,text="*",width=10,command=mul)
-b.place(x=50,y=220)
-def div():
-    num1=e.get()
-    global i
-    global math
-    math="division"
-    i=int(num1)
-    e.delete(0,END)
-b=Button(window,text="/",width=10,command=div)
-b.place(x=135,y=220)
-def equal():
-    num2=e.get()
-    e.delete(0,END)
-    if math=="addition":
-        e.insert(0,i+int(num2))
-    elif math=="subtraction":
-        e.insert(0,i-int(num2))
-    elif math=="multiplication":
-        e.insert(0,i*int(num2))
-    elif math=="division":
-        e.insert(0,i/int(num2))
-    
-b=Button(window,text="=",width=10,command=equal)
-b.place(x=220,y=220)
-def clear():
-    e.delete(0,END)
-b=Button(window,text="Clear",width=10,command=clear)
-b.place(x=50,y=250)
-def destroy():
-    window.destroy()
-b=Button(window,text="Quit",width=10,command=destroy)
-b.place(x=135,y=250)
-#step6: mainloop
-mainloop()
-window.mainloop()
+"""
+Improved Calculator GUI
+
+- Encapsulated in a Calculator class (no globals)
+- Uses ttk for consistent look & larger, accessible fonts
+- Uses StringVar for the display
+- Supports float arithmetic and operator chaining
+- Handles divide-by-zero and invalid input gracefully
+- Keyboard bindings for accessibility (digits, + - * /, Enter, Backspace, Esc)
+- Uses grid layout for consistent placement/resizing
+- Single mainloop call
+"""
+import tkinter as tk
+from tkinter import ttk
+from typing import Optional
+
+class Calculator(tk.Tk):
+    def __init__(self) -> None:
+        super().__init__()
+        self.title("Accessible Calculator")
+        self.geometry("360x460")
+        self.resizable(False, False)
+
+        # Styling
+        self.style = ttk.Style(self)
+        try:
+            self.style.theme_use("clam")
+        except Exception:
+            pass
+        self.font = ("Segoe UI", 14)
+
+        # State
+        self.display_var = tk.StringVar(value="0")
+        self._operand: Optional[float] = None
+        self._operator: Optional[str] = None
+        self._reset_next = False  # whether next digit press should start a new entry
+
+        self._build_ui()
+        self._bind_keys()
+
+    def _build_ui(self) -> None:
+        # Display frame
+        disp_frame = ttk.Frame(self, padding=(10, 10, 10, 0))
+        disp_frame.pack(fill="x")
+
+        display = ttk.Entry(
+            disp_frame,
+            textvariable=self.display_var,
+            font=("Segoe UI", 20),
+            justify="right",
+            state="readonly",
+        )
+        # Make entry focusable for screen readers; use readonly to disallow typing
+        display.pack(fill="x", ipady=10)
+
+        # Buttons frame
+        btn_frame = ttk.Frame(self, padding=10)
+        btn_frame.pack(fill="both", expand=True)
+
+        btn_cfg = {"width": 6, "padding": 6}
+        # Layout using grid (row, column)
+        buttons = [
+            ("7", 1, 0), ("8", 1, 1), ("9", 1, 2), ("/", 1, 3),
+            ("4", 2, 0), ("5", 2, 1), ("6", 2, 2), ("*", 2, 3),
+            ("1", 3, 0), ("2", 3, 1), ("3", 3, 2), ("-", 3, 3),
+            ("0", 4, 0), (".", 4, 1), ("=", 4, 2), ("+", 4, 3),
+        ]
+
+        for (text, r, c) in buttons:
+            action = (lambda val=text: self.on_button(val))
+            btn = ttk.Button(btn_frame, text=text, command=action)
+            btn.grid(row=r, column=c, sticky="nsew", padx=4, pady=4)
+            btn.configure(style="TButton")
+            btn.bind("<Return>", lambda e, val=text: self.on_button(val))  # keyboard activation
+
+        # Extra controls row
+        clear_btn = ttk.Button(btn_frame, text="Clear", command=self.clear)
+        clear_btn.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=4, pady=4)
+        del_btn = ttk.Button(btn_frame, text="Del", command=self.backspace)
+        del_btn.grid(row=0, column=2, sticky="nsew", padx=4, pady=4)
+        quit_btn = ttk.Button(btn_frame, text="Quit", command=self.destroy)
+        quit_btn.grid(row=0, column=3, sticky="nsew", padx=4, pady=4)
+
+        # Make columns expand evenly
+        for i in range(4):
+            btn_frame.columnconfigure(i, weight=1)
+        for i in range(5):
+            btn_frame.rowconfigure(i, weight=1)
+
+        # Set accessible focus order (tab order)
+        clear_btn.focus_set()
+
+    def _bind_keys(self) -> None:
+        # Digits and dot
+        for key in "0123456789.":
+            self.bind(key, lambda e, ch=key: self.on_digit(ch))
+        # Operators
+        for key in ("+", "-", "*", "/"):
+            self.bind(key, lambda e, op=key: self.on_operator(op))
+        # Enter/Return for equals
+        self.bind("<Return>", lambda e: self.calculate())
+        # Backspace -> delete last char
+        self.bind("<BackSpace>", lambda e: self.backspace())
+        # Escape -> clear
+        self.bind("<Escape>", lambda e: self.clear())
+
+    # UI actions
+    def on_button(self, token: str) -> None:
+        if token in "0123456789.":
+            self.on_digit(token)
+        elif token in "+-*/":
+            self.on_operator(token)
+        elif token == "=":
+            self.calculate()
+        else:
+            # safety fallback
+            pass
+
+    def on_digit(self, ch: str) -> None:
+        cur = self.display_var.get()
+        if self._reset_next or cur == "0":
+            new = ch if ch != "." else "0."
+            self._reset_next = False
+        else:
+            # avoid multiple dots
+            if ch == "." and "." in cur:
+                return
+            new = cur + ch
+        self.display_var.set(new)
+
+    def on_operator(self, op: str) -> None:
+        try:
+            cur_val = float(self.display_var.get())
+        except ValueError:
+            self.display_var.set("Error")
+            return
+        if self._operand is not None and not self._reset_next:
+            # chain previous operation
+            self._compute(cur_val)
+        else:
+            self._operand = cur_val
+        self._operator = op
+        self._reset_next = True
+
+    def calculate(self) -> None:
+        if self._operator is None or self._operand is None:
+            return
+        try:
+            cur_val = float(self.display_var.get())
+        except ValueError:
+            self.display_var.set("Error")
+            return
+        try:
+            result = self._compute(cur_val)
+        except ZeroDivisionError:
+            self.display_var.set("∞")
+            self._operand = None
+            self._operator = None
+            self._reset_next = True
+            return
+        # Display result cleanly: int without .0 when possible
+        if result.is_integer():
+            self.display_var.set(str(int(result)))
+        else:
+            # limit display length
+            self.display_var.set(str(round(result, 10)).rstrip("0").rstrip("."))
+        self._operand = None
+        self._operator = None
+        self._reset_next = True
+
+    def _compute(self, right: float) -> float:
+        assert self._operator is not None and self._operand is not None
+        left = self._operand
+        op = self._operator
+        if op == "+":
+            val = left + right
+        elif op == "-":
+            val = left - right
+        elif op == "*":
+            val = left * right
+        elif op == "/":
+            if right == 0:
+                raise ZeroDivisionError
+            val = left / right
+        else:
+            raise ValueError("Unknown operator")
+        # store intermediate result for chaining
+        self._operand = val
+        self._reset_next = True
+        return val
+
+    def clear(self) -> None:
+        self.display_var.set("0")
+        self._operand = None
+        self._operator = None
+        self._reset_next = False
+
+    def backspace(self) -> None:
+        cur = self.display_var.get()
+        if len(cur) <= 1:
+            self.display_var.set("0")
+        else:
+            self.display_var.set(cur[:-1])
+
+if __name__ == "__main__":
+    app = Calculator()
+    app.mainloop()

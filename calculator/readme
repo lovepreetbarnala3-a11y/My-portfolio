@@ -17,6 +17,7 @@ This is a simple GUI calculator built with Tkinter (Python's standard GUI toolki
 - Addition, subtraction, multiplication, division
 - Clear and Quit buttons
 - Displays results in the entry box
+- Don't give ZeroDivisionError
 
 ## Usage
 
@@ -28,15 +29,4 @@ python calculator/calculator.py
 
 Enter the first number, press an operator (+, -, *, /), enter the second number, then press `=` to see the result. Use `Clear` to reset the input and `Quit` to close the application.
 
-## Notes & Known Limitations
-
-- The current implementation converts inputs to integers; using non-integer input will raise a `ValueError`.
-- Division by zero will raise a `ZeroDivisionError`.
-- Results of division are regular Python division (may produce float results).
-
-## Suggested improvements
-
-- Support floating-point input and results.
-- Add keyboard input support and accessibility labels.
-- Add input validation and error handling to prevent crashes on invalid input.
 
