@@ -8,7 +8,7 @@ This is a simple GUI calculator built with Tkinter (Python's standard GUI toolki
 
 ## Requirements
 
-- Python 3.x
+- Python 3.145
 - Tkinter (usually included with standard Python installations)
 
 ## Features
