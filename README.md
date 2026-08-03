@@ -28,11 +28,6 @@ Open `web_page/Index.html` in your web browser to view the site. You can run a l
 
    Then open: `http://localhost:8000/web_page/Index.html`
 
-## Notes & suggested fixes
-- Image source: The current `Index.html` uses an absolute Windows path (`D:iphone\IMG_0749.JPG`). Replace this with a relative path inside the repo (for example `web_page/assets/images/profile.jpg`) and commit the image so it loads for others and when hosted.
-
-- Email link: There's a space in the `mailto:` link (`Lovepreetbarnala3@gmail. com`). Remove the extra space so it becomes `mailto:Lovepreetbarnala3@gmail.com`.
-
 - HTML improvements: Consider these small fixes to improve accessibility and correctness:
   - Use consistent lowercase tag names for HTML and CSS (e.g., `<style>` instead of `<Style>`).
   - Add `alt` text for images (already present, but make it descriptive).
@@ -56,6 +51,5 @@ Add a license file if you want to make the project open-source. For example, cre
 
 ## Contact
 Lovepreet Barnala — lovepreetbarnala3@gmail.com
-
 LinkedIn: https://www.linkedin.com/in/lovepreet-barnala-45b0a924b/
 Instagram: https://www.instagram.com/love._o5
