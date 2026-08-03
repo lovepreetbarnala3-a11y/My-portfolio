@@ -1,1 +1,67 @@
+# Web Page — Index.html
 
+This README documents the web page at `web_page/Index.html` in this repository, explains how to view it locally, and lists issues and recommended fixes so the page displays and behaves correctly.
+
+## Summary
+
+A simple personal portfolio page (`Index.html`). The file contains a header, an "About Me" section with an image, contact links, and social links. The current file contains some HTML, path, and accessibility issues — see "Notes & fixes" below.
+
+## How to view locally
+
+1. Clone the repository or download the `web_page` folder.
+2. Place the profile image in the same folder as `Index.html` or update the `img` `src` to a correct relative path (examples below).
+3. Open `web_page/Index.html` in a web browser.
+
+## Quick fixes to apply (recommended)
+
+- Normalize filename: Rename `Index.html` to `index.html` (lowercase) for consistency and to avoid case-sensitivity issues on some servers.
+- Fix the image path:
+  - Current: `src="D:iphone\\IMG_0749.JPG"` — this points to an absolute/local Windows path and will not load for other users or on a web server.
+  - Recommended: place the image in the `web_page/images/` folder and use a relative path: `src="images/IMG_0749.JPG"`.
+  - Example: `<img src="images/IMG_0749.JPG" alt="Portrait of Lovepreet" height="300">`
+- Remove stray/incorrect tags:
+  - There is an extra `</a>` after the `img` tag — remove it.
+  - The file contains a placeholder `<[...]` which is invalid HTML — replace with the intended content or remove.
+  - Use `<style>` (lowercase) instead of `<Style>` for the CSS block.
+- Fix the mailto link: `href="mailto:Lovepreetbarnala3@gmail. com"` has an extra space before `com`. Use `mailto:lovepreetbarnala3@gmail.com`.
+- Ensure all HTML tags are properly opened and closed (e.g., `article`, `section`, `main`).
+- Use semantic markup and headings in order (h1, h2, h3) for accessibility.
+
+## Accessibility improvements
+
+- Provide meaningful alt text for the profile image (e.g., `alt="Portrait of Lovepreet"`).
+- Ensure color contrast and font sizes are sufficient for readability.
+- Make link text descriptive (e.g., "Lovepreet on Instagram").
+- Ensure keyboard focus styles are visible for interactive elements.
+
+## Code-quality suggestions / small HTML snippet fixes
+
+- Replace the image tag and mailto example:
+
+```html
+<!-- Put the profile image in web_page/images/IMG_0749.JPG -->
+<img src="images/IMG_0749.JPG" alt="Portrait of Lovepreet" height="300">
+
+<!-- Fix mailto -->
+<a href="mailto:lovepreetbarnala3@gmail.com">lovepreetbarnala3@gmail.com</a>
+```
+
+- Add rel attributes to external links that open a new tab:
+
+```html
+<a href="https://www.instagram.com/..." target="_blank" rel="noopener noreferrer">Lovepreet on Instagram</a>
+```
+
+## Optional improvements
+
+- Extract CSS to `style.css` for maintainability and include: `<link rel="stylesheet" href="style.css">`.
+- Add a simple contact form (server or form service required) instead of exposing phone number if privacy is a concern.
+- Add a license or short author line at the bottom.
+
+## Contact / Author
+
+Lovepreet Barnala — lovepreetbarnala3@gmail.com
+
+---
+
+This README documents `web_page/Index.html` and provides actionable fixes to make the page work cross-platform and improve accessibility.
