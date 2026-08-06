@@ -108,37 +108,92 @@ class TodoApp:
 
     # ---------- Data operations ----------
     def load_tasks(self):
-        if os.path.exists(DATA_FILE):
-            try:
-                with open(DATA_FILE, "r", encoding="utf-8") as f:
-                    self.tasks = json.load(f)
-            except (json.JSONDecodeError, IOError):
-                self.tasks = []
-        else:
+        """Load tasks.json safely, validate items, and recover from malformed files."""
+        self.tasks = []
+        if not os.path.exists(DATA_FILE):
+            return
+
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            messagebox.showwarning(
+                "Load Error",
+                f"Could not parse {os.path.basename(DATA_FILE)}. Starting with an empty task list.\n\nError: {e}",
+            )
+            # Optionally rename the corrupt file so user can inspect it:
+            # os.rename(DATA_FILE, DATA_FILE + ".corrupt")
             self.tasks = []
+            return
+        except IOError as e:
+            messagebox.showwarning(
+                "Load Error",
+                f"Could not read {os.path.basename(DATA_FILE)}. Starting with an empty task list.\n\nError: {e}",
+            )
+            self.tasks = []
+            return
+
+        # Validate and sanitize loaded data
+        if not isinstance(data, list):
+            # file might contain a dict or other structure; ignore it
+            messagebox.showwarning(
+                "Load Error",
+                f"{os.path.basename(DATA_FILE)} has unexpected content. Expected a list of tasks — starting empty."
+            )
+            self.tasks = []
+            return
+
+        safe_tasks = []
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            text = item.get("text")
+            if text is None:
+                # skip items without text
+                continue
+            text = str(text).strip()
+            if not text:
+                continue
+            done = bool(item.get("done", False))
+            created = item.get("created") or datetime.now().strftime("%Y-%m-%d %H:%M")
+            safe_tasks.append({"text": text, "done": done, "created": created})
+        self.tasks = safe_tasks
 
     def save_tasks(self):
+        """Write tasks out. Use a safe write method to reduce chance of truncation/corruption."""
         try:
-            with open(DATA_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.tasks, f, indent=2)
-        except IOError as e:
+            # Simple atomic-ish write: write to temp file then replace.
+            tmp_path = DATA_FILE + ".tmp"
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                json.dump(self.tasks, f, indent=2, ensure_ascii=False)
+            # Replace original (atomic on many OSes)
+            os.replace(tmp_path, DATA_FILE)
+        except Exception as e:
             messagebox.showerror("Save Error", f"Could not save tasks:\n{e}")
 
     # ---------- List rendering ----------
     def refresh_list(self):
+        """Render tasks list safely even if some entries are missing fields."""
         self.listbox.delete(0, tk.END)
         for task in self.tasks:
-            prefix = "[x] " if task["done"] else "[ ] "
-            display = prefix + task["text"]
+            text = task.get("text", "")
+            done = bool(task.get("done", False))
+            prefix = "[x] " if done else "[ ] "
+            display = prefix + text
             self.listbox.insert(tk.END, display)
-            if task["done"]:
+            if done:
                 idx = self.listbox.size() - 1
-                self.listbox.itemconfig(idx, fg="#888888")
+                # itemconfig uses 'fg' on tk.Listbox
+                try:
+                    self.listbox.itemconfig(idx, fg="#888888")
+                except Exception:
+                    # In case itemconfig is unsupported on some platforms, ignore.
+                    pass
         self.update_status()
 
     def update_status(self):
         total = len(self.tasks)
-        done = sum(1 for t in self.tasks if t["done"])
+        done = sum(1 for t in self.tasks if t.get("done"))
         self.status_var.set(f"{done} of {total} tasks completed")
 
     # ---------- Actions ----------
@@ -196,13 +251,13 @@ class TodoApp:
             self.refresh_list()
 
     def clear_completed(self):
-        if not any(t["done"] for t in self.tasks):
+        if not any(t.get("done") for t in self.tasks):
             return
         confirm = messagebox.askyesno(
             "Clear Completed", "Remove all completed tasks?"
         )
         if confirm:
-            self.tasks = [t for t in self.tasks if not t["done"]]
+            self.tasks = [t for t in self.tasks if not t.get("done")]
             self.save_tasks()
             self.refresh_list()
 
